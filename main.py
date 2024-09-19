@@ -9,8 +9,10 @@ from notification_manager import NotificationManager
 
 data_manager = DataManager()
 sheet_data = data_manager.get_destination_data()
+emails = data_manager.get_client_emails()
 flight_search = FlightSearch()
 notification_manager = NotificationManager()
+
 
 # Set your origin airport
 ORIGIN_CITY_IATA = "LON"
@@ -59,10 +61,19 @@ for destination in sheet_data:
         #                  f"on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
         # )
         # SMS not working? Try whatsapp instead.
-        notification_manager.send_whatsapp(
-            message_body=f"Low price alert! Only £{cheapest_flight.price} to fly "
-                         f"from {cheapest_flight.origin_airport} to {cheapest_flight.destination_airport}, "
-                         f"on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
-        )
-
-
+        # notification_manager.send_whatsapp(
+        #     message_body=f"Low price alert! Only £{cheapest_flight.price} to fly "
+        #                  f"from {cheapest_flight.origin_airport} to {cheapest_flight.destination_airport}, "
+        #                  f"on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
+        # )
+        message = (f"Low price alert! Only {cheapest_flight.price} GBP to fly from {cheapest_flight.origin_airport} to "
+                   f"{cheapest_flight.destination_airport}, on {cheapest_flight.out_date} "
+                   f"until {cheapest_flight.return_date}")
+        if cheapest_flight.stops > 0:
+            message += f", with {cheapest_flight.stops}."
+        else:
+            message += "."
+        for user in emails:
+            notification_manager.send_emails(client_email=user,
+                message_body= message
+            )
